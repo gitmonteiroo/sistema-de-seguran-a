@@ -1,73 +1,231 @@
-# Welcome to your Lovable project
+# Sistema de Checklists e Registro de Ocorrências – Segurança & Qualidade Industrial
 
-## Project info
+![Status](https://img.shields.io/badge/status-active-success.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-**URL**: https://lovable.dev/projects/4187ff74-d8e0-4a8d-999e-aecc8e8b7e41
+Sistema completo para gerenciamento de checklists diários, não conformidades e ocorrências em ambiente industrial. Desenvolvido como MVP funcional, leve e pronto para uso em portfólio.
 
-## How can I edit this code?
+**Desenvolvido por:** [César Monteiro](https://www.linkedin.com/in/cesar-monteiro-030bb3170)
 
-There are several ways of editing your application.
+## 🎯 Problema
 
-**Use Lovable**
+Na indústria, checklists e ocorrências ainda são registrados em papel, gerando:
+- ❌ Falta de rastreabilidade
+- ❌ Dificuldade de localizar registros antigos
+- ❌ Falhas na comunicação entre turnos
+- ❌ Risco à segurança operacional
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4187ff74-d8e0-4a8d-999e-aecc8e8b7e41) and start prompting.
+## ✨ Solução
 
-Changes made via Lovable will be committed automatically to this repo.
+Sistema web **offline-first** (PWA) que permite:
+- ✅ Preencher Checklists Diários (turnos 1, 2 e 3)
+- ✅ Registrar Não Conformidades
+- ✅ Registrar Ocorrências (acidente, incidente, quase-acidente)
+- ✅ Supervisores acompanharem tudo em tempo real
+- ✅ Funcionar offline e sincronizar quando voltar internet
+- ✅ Gerar relatórios em PDF e Excel
 
-**Use your preferred IDE**
+## 🔧 Tecnologias
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend:** React 18 + TypeScript
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Armazenamento:** IndexedDB (offline-first)
+- **PWA:** Service Worker + Manifest
+- **Relatórios:** jsPDF + SheetJS (xlsx)
+- **Build:** Vite
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📋 Funcionalidades
 
-Follow these steps:
+### 1. Sistema de Login
+- Login simples com validação
+- Usuários padrão:
+  - **Supervisor:** admin@gmail.com / admin
+  - **Operador:** operador@gmail.com / operador
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 2. Dashboard
+- Total de checklists do dia
+- Total de ocorrências
+- Últimas não conformidades
+- Navegação rápida para módulos
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 3. Checklists (Turnos 1, 2, 3)
+- 10 itens de verificação de segurança
+- Resposta Sim/Não para cada item
+- Campo de observações
+- Armazenamento offline
+- Identificação por turno
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 4. Não Conformidades
+- Tipos predefinidos (equipamento danificado, falta de EPI, etc.)
+- Descrição detalhada
+- Local/setor
+- Turno
+- Upload de foto (opcional)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 5. Ocorrências
+- Tipos: Acidente, Incidente, Quase-acidente
+- Setor e descrição
+- Possível causa
+- Envolvidos
+- Upload de foto (opcional)
+- Data e hora automáticas
+
+### 6. Supervisão (apenas Supervisores)
+- Lista de checklists preenchidos
+- Últimas ocorrências
+- Últimas não conformidades
+- Filtros por turno, setor, tipo e data
+- Atualização em tempo real
+
+### 7. Relatórios
+- Filtros por tipo (Checklists, Não Conformidades, Ocorrências)
+- Exportação para PDF
+- Exportação para Excel
+- Estatísticas resumidas
+
+### 8. PWA - Funciona Offline
+- Instalável em dispositivos móveis
+- Service Worker para cache
+- IndexedDB para dados offline
+- Sincronização automática (quando implementar backend)
+
+## 🚀 Como Rodar
+
+### Pré-requisitos
+- Node.js 18+ instalado
+- npm ou yarn
+
+### Instalação
+
+1. **Clone o repositório:**
+```bash
+git clone <seu-repositorio>
+cd <nome-do-projeto>
+```
+
+2. **Instale as dependências:**
+```bash
+npm install
+```
+
+3. **Inicie o servidor de desenvolvimento:**
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. **Acesse no navegador:**
+```
+http://localhost:8080
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Build para Produção
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Os arquivos otimizados estarão na pasta `dist/`.
 
-## What technologies are used for this project?
+### Instalar como PWA (Mobile/Desktop)
 
-This project is built with:
+1. Acesse o sistema pelo navegador do celular ou desktop
+2. Clique no menu do navegador
+3. Selecione "Adicionar à Tela Inicial" ou "Instalar App"
+4. O sistema funcionará como um aplicativo nativo
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📱 Uso no Chão de Fábrica
 
-## How can I deploy this project?
+O sistema foi projetado para ser usado em dispositivos móveis no chão de fábrica:
 
-Simply open [Lovable](https://lovable.dev/projects/4187ff74-d8e0-4a8d-999e-aecc8e8b7e41) and click on Share -> Publish.
+- **Botões grandes** para facilitar o toque
+- **Interface limpa** e focada
+- **Cores industriais** (azul profundo, cinza, branco)
+- **Funciona offline** - preencha mesmo sem internet
+- **Sincroniza automaticamente** quando a conexão voltar
 
-## Can I connect a custom domain to my Lovable project?
+## 👥 Credenciais de Teste
 
-Yes, you can!
+### Supervisor
+- **E-mail:** admin@gmail.com
+- **Senha:** admin
+- **Acesso a:** Todos os módulos + Supervisão
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Operador
+- **E-mail:** operador@gmail.com
+- **Senha:** operador
+- **Acesso a:** Checklists, Não Conformidades, Ocorrências, Relatórios
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📊 Estrutura do Projeto
+
+```
+src/
+├── components/          # Componentes reutilizáveis
+│   ├── ui/             # Componentes shadcn/ui
+│   ├── Layout.tsx      # Layout principal
+│   └── ProtectedRoute.tsx
+├── contexts/           # Contextos React
+│   └── AuthContext.tsx # Gerenciamento de autenticação
+├── lib/                # Bibliotecas e utilitários
+│   ├── db.ts          # IndexedDB (offline storage)
+│   └── utils.ts       # Funções auxiliares
+├── pages/              # Páginas da aplicação
+│   ├── Login.tsx
+│   ├── Dashboard.tsx
+│   ├── Checklists.tsx
+│   ├── NaoConformidades.tsx
+│   ├── Ocorrencias.tsx
+│   ├── Supervisao.tsx
+│   └── Relatorios.tsx
+├── App.tsx             # Configuração de rotas
+├── index.css           # Estilos globais (design system)
+└── main.tsx            # Entry point
+
+public/
+├── manifest.json       # Configuração PWA
+├── sw.js              # Service Worker
+├── icon-192.png       # Ícone PWA 192x192
+└── icon-512.png       # Ícone PWA 512x512
+```
+
+## 🎨 Design System
+
+O projeto utiliza um design system industrial com:
+
+- **Primary:** Azul industrial profundo (#1e3a8a)
+- **Secondary:** Cinza metálico
+- **Accent:** Laranja de segurança (alertas)
+- **Success:** Verde (conforme)
+- **Destructive:** Vermelho (não conforme)
+
+Todos os componentes seguem tokens semânticos definidos em `src/index.css` e `tailwind.config.ts`.
+
+## 🔒 Segurança
+
+- Autenticação local (para MVP)
+- Proteção de rotas
+- Supervisão restrita a usuários supervisor
+- Validação de formulários
+
+## 🚀 Próximos Passos (Melhorias Futuras)
+
+- [ ] Integração com backend (Firebase/Supabase)
+- [ ] Autenticação real (JWT)
+- [ ] Notificações push
+- [ ] Chat entre turnos
+- [ ] Dashboard com gráficos
+- [ ] Histórico completo com busca avançada
+- [ ] Assinatura digital nos checklists
+- [ ] Integração com câmera para fotos
+
+## 📄 Licença
+
+Este projeto é de código aberto para fins educacionais e de portfólio.
+
+## 👨‍💻 Desenvolvedor
+
+**César Monteiro**  
+LinkedIn: [cesar-monteiro-030bb3170](https://www.linkedin.com/in/cesar-monteiro-030bb3170)
+
+---
+
+⭐ Se este projeto foi útil, considere dar uma estrela no repositório!
