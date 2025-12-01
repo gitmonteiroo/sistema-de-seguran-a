@@ -2,16 +2,20 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { getAllChecklists, getAllNaoConformidades, getAllOcorrencias } from '@/lib/db';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Shield, ClipboardCheck, FileWarning, AlertTriangle } from 'lucide-react';
+import { Shield, ClipboardCheck, FileWarning, AlertTriangle, X } from 'lucide-react';
 
 const Supervisao = () => {
   const [checklists, setChecklists] = useState<any[]>([]);
   const [naoConformidades, setNaoConformidades] = useState<any[]>([]);
   const [ocorrencias, setOcorrencias] = useState<any[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<string>('todos');
+  const [selectedChecklist, setSelectedChecklist] = useState<any>(null);
+  const [selectedNaoConformidade, setSelectedNaoConformidade] = useState<any>(null);
+  const [selectedOcorrencia, setSelectedOcorrencia] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -97,7 +101,8 @@ const Supervisao = () => {
                 return (
                   <div
                     key={checklist.id}
-                    className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    onClick={() => setSelectedChecklist(checklist)}
+                    className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                   >
                     <div className="p-2 bg-primary/10 rounded-lg">
                       <ClipboardCheck className="w-5 h-5 text-primary" />
@@ -152,7 +157,8 @@ const Supervisao = () => {
               {naoConformidadesFiltradas.slice(0, 10).map((nc) => (
                 <div
                   key={nc.id}
-                  className="flex items-start gap-4 p-4 border-2 border-destructive/20 rounded-lg hover:bg-destructive/5 transition-colors"
+                  onClick={() => setSelectedNaoConformidade(nc)}
+                  className="flex items-start gap-4 p-4 border-2 border-destructive/20 rounded-lg hover:bg-destructive/5 transition-colors cursor-pointer"
                 >
                   <div className="p-2 bg-destructive/10 rounded-lg">
                     <FileWarning className="w-5 h-5 text-destructive" />
@@ -201,7 +207,8 @@ const Supervisao = () => {
               {ocorrencias.slice(0, 10).map((ocorrencia) => (
                 <div
                   key={ocorrencia.id}
-                  className="flex items-start gap-4 p-4 border-2 border-accent/20 rounded-lg hover:bg-accent/5 transition-colors"
+                  onClick={() => setSelectedOcorrencia(ocorrencia)}
+                  className="flex items-start gap-4 p-4 border-2 border-accent/20 rounded-lg hover:bg-accent/5 transition-colors cursor-pointer"
                 >
                   <div className="p-2 bg-accent/10 rounded-lg">
                     <AlertTriangle className="w-5 h-5 text-accent" />
@@ -232,6 +239,211 @@ const Supervisao = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog para Checklist */}
+      <Dialog open={!!selectedChecklist} onOpenChange={() => setSelectedChecklist(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-primary" />
+              Detalhes do Checklist
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas do checklist realizado
+            </DialogDescription>
+          </DialogHeader>
+          {selectedChecklist && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Operador</p>
+                  <p className="font-semibold">{selectedChecklist.operador}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Turno</p>
+                  <Badge variant="outline">Turno {selectedChecklist.turno}</Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Data</p>
+                  <p className="font-semibold">
+                    {format(new Date(selectedChecklist.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR,
+                    })}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Conformidade</p>
+                  <p className="font-semibold">
+                    {selectedChecklist.items.filter((i: any) => i.resposta).length}/{selectedChecklist.items.length} itens
+                  </p>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold mb-2">Itens do Checklist</h3>
+                <div className="space-y-2">
+                  {selectedChecklist.items.map((item: any, index: number) => (
+                    <div
+                      key={index}
+                      className={`flex items-center justify-between p-3 rounded-lg border ${
+                        item.resposta ? 'bg-primary/5 border-primary/20' : 'bg-destructive/5 border-destructive/20'
+                      }`}
+                    >
+                      <span>{item.pergunta}</span>
+                      <Badge variant={item.resposta ? 'default' : 'destructive'}>
+                        {item.resposta ? 'Conforme' : 'Não Conforme'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedChecklist.observacoes && (
+                <div>
+                  <h3 className="font-semibold mb-2">Observações</h3>
+                  <p className="text-sm bg-muted p-3 rounded-lg">{selectedChecklist.observacoes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para Não Conformidade */}
+      <Dialog open={!!selectedNaoConformidade} onOpenChange={() => setSelectedNaoConformidade(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileWarning className="w-5 h-5 text-destructive" />
+              Detalhes da Não Conformidade
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas da não conformidade registrada
+            </DialogDescription>
+          </DialogHeader>
+          {selectedNaoConformidade && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Tipo</p>
+                  <p className="font-semibold">{selectedNaoConformidade.tipo}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Turno</p>
+                  <Badge variant="outline">Turno {selectedNaoConformidade.turno}</Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Local/Setor</p>
+                  <p className="font-semibold">{selectedNaoConformidade.local}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Operador</p>
+                  <p className="font-semibold">{selectedNaoConformidade.operador}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Data</p>
+                  <p className="font-semibold">
+                    {format(new Date(selectedNaoConformidade.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR,
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Descrição</h3>
+                <p className="text-sm bg-muted p-3 rounded-lg">{selectedNaoConformidade.descricao}</p>
+              </div>
+
+              {selectedNaoConformidade.foto && (
+                <div>
+                  <h3 className="font-semibold mb-2">Foto</h3>
+                  <img
+                    src={selectedNaoConformidade.foto}
+                    alt="Foto da não conformidade"
+                    className="w-full rounded-lg border"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para Ocorrência */}
+      <Dialog open={!!selectedOcorrencia} onOpenChange={() => setSelectedOcorrencia(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-accent" />
+              Detalhes da Ocorrência
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas da ocorrência registrada
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOcorrencia && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Tipo</p>
+                  <p className="font-semibold capitalize">{selectedOcorrencia.tipo.replace('-', ' ')}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Setor</p>
+                  <Badge variant="outline">{selectedOcorrencia.setor}</Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Turno</p>
+                  <Badge variant="outline">Turno {selectedOcorrencia.turno}</Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Operador</p>
+                  <p className="font-semibold">{selectedOcorrencia.operador}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Data</p>
+                  <p className="font-semibold">
+                    {format(new Date(selectedOcorrencia.createdAt), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR,
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Descrição</h3>
+                <p className="text-sm bg-muted p-3 rounded-lg">{selectedOcorrencia.descricao}</p>
+              </div>
+
+              {selectedOcorrencia.causa && (
+                <div>
+                  <h3 className="font-semibold mb-2">Possível Causa</h3>
+                  <p className="text-sm bg-muted p-3 rounded-lg">{selectedOcorrencia.causa}</p>
+                </div>
+              )}
+
+              {selectedOcorrencia.envolvidos && (
+                <div>
+                  <h3 className="font-semibold mb-2">Envolvidos</h3>
+                  <p className="text-sm bg-muted p-3 rounded-lg">{selectedOcorrencia.envolvidos}</p>
+                </div>
+              )}
+
+              {selectedOcorrencia.foto && (
+                <div>
+                  <h3 className="font-semibold mb-2">Foto</h3>
+                  <img
+                    src={selectedOcorrencia.foto}
+                    alt="Foto da ocorrência"
+                    className="w-full rounded-lg border"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

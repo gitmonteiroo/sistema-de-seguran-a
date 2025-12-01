@@ -74,11 +74,6 @@ const Login = () => {
                 className="h-12"
               />
             </div>
-            <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-              <p className="font-semibold mb-1">Credenciais de teste:</p>
-              <p>Supervisor: admin@gmail.com / admin</p>
-              <p>Operador: operador@gmail.com / operador</p>
-            </div>
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full h-12 text-lg" size="lg">
