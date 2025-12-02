@@ -3,26 +3,81 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { getAllChecklists, getAllNaoConformidades, getAllOcorrencias } from '@/lib/db';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Shield, ClipboardCheck, FileWarning, AlertTriangle, X } from 'lucide-react';
+import { Shield, ClipboardCheck, FileWarning, AlertTriangle, X, Filter } from 'lucide-react';
 
 const Supervisao = () => {
   const [checklists, setChecklists] = useState<any[]>([]);
   const [naoConformidades, setNaoConformidades] = useState<any[]>([]);
   const [ocorrencias, setOcorrencias] = useState<any[]>([]);
   const [filtroTurno, setFiltroTurno] = useState<string>('todos');
+  const [filtroDataInicio, setFiltroDataInicio] = useState<string>('');
+  const [filtroDataFim, setFiltroDataFim] = useState<string>('');
+  const [filtroSetor, setFiltroSetor] = useState<string>('todos');
+  const [filtroTipo, setFiltroTipo] = useState<string>('todos');
   const [selectedChecklist, setSelectedChecklist] = useState<any>(null);
   const [selectedNaoConformidade, setSelectedNaoConformidade] = useState<any>(null);
   const [selectedOcorrencia, setSelectedOcorrencia] = useState<any>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadData();
-    // Reload data every 30 seconds
-    const interval = setInterval(loadData, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    
+    // Subscribe to real-time updates for não conformidades
+    const naoConformidadesChannel = supabase
+      .channel('nao_conformidades_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'nao_conformidades'
+        },
+        (payload) => {
+          console.log('Nova não conformidade:', payload);
+          toast({
+            title: "⚠️ Nova Não Conformidade",
+            description: `${payload.new.tipo} - ${payload.new.local}`,
+            variant: "destructive",
+          });
+          loadData();
+        }
+      )
+      .subscribe();
+
+    // Subscribe to real-time updates for ocorrências
+    const ocorrenciasChannel = supabase
+      .channel('ocorrencias_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'ocorrencias'
+        },
+        (payload) => {
+          console.log('Nova ocorrência:', payload);
+          toast({
+            title: "🚨 Nova Ocorrência",
+            description: `${payload.new.tipo.replace('-', ' ').toUpperCase()} - ${payload.new.setor}`,
+            variant: "destructive",
+          });
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(naoConformidadesChannel);
+      supabase.removeChannel(ocorrenciasChannel);
+    };
+  }, [toast]);
 
   const loadData = async () => {
     const checklistsData = await getAllChecklists();
@@ -40,39 +95,134 @@ const Supervisao = () => {
     ));
   };
 
-  const checklistsFiltrados = filtroTurno === 'todos' 
-    ? checklists 
-    : checklists.filter(c => c.turno.toString() === filtroTurno);
+  // Aplicar todos os filtros
+  const checklistsFiltrados = checklists.filter(c => {
+    if (filtroTurno !== 'todos' && c.turno.toString() !== filtroTurno) return false;
+    if (filtroDataInicio && c.data < filtroDataInicio) return false;
+    if (filtroDataFim && c.data > filtroDataFim) return false;
+    return true;
+  });
 
-  const naoConformidadesFiltradas = filtroTurno === 'todos' 
-    ? naoConformidades 
-    : naoConformidades.filter(nc => nc.turno.toString() === filtroTurno);
+  const naoConformidadesFiltradas = naoConformidades.filter(nc => {
+    if (filtroTurno !== 'todos' && nc.turno.toString() !== filtroTurno) return false;
+    if (filtroDataInicio && nc.data < filtroDataInicio) return false;
+    if (filtroDataFim && nc.data > filtroDataFim) return false;
+    if (filtroSetor !== 'todos' && nc.local !== filtroSetor) return false;
+    if (filtroTipo !== 'todos' && nc.tipo !== filtroTipo) return false;
+    return true;
+  });
+
+  const ocorrenciasFiltradas = ocorrencias.filter(o => {
+    if (filtroDataInicio && o.data < filtroDataInicio) return false;
+    if (filtroDataFim && o.data > filtroDataFim) return false;
+    if (filtroSetor !== 'todos' && o.setor !== filtroSetor) return false;
+    if (filtroTipo !== 'todos' && o.tipo !== filtroTipo) return false;
+    return true;
+  });
+
+  // Extrair valores únicos para os filtros
+  const setoresUnicos = [...new Set([
+    ...naoConformidades.map(nc => nc.local),
+    ...ocorrencias.map(o => o.setor)
+  ])].filter(Boolean).sort();
+
+  const tiposNaoConformidade = [...new Set(naoConformidades.map(nc => nc.tipo))].filter(Boolean).sort();
+  const tiposOcorrencia = [...new Set(ocorrencias.map(o => o.tipo))].filter(Boolean).sort();
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-            <Shield className="w-8 h-8 text-primary" />
-            Supervisão em Tempo Real
-          </h1>
-          <p className="text-muted-foreground">
-            Acompanhe todas as atividades de segurança e qualidade
-          </p>
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+              <Shield className="w-8 h-8 text-primary" />
+              Supervisão em Tempo Real
+            </h1>
+            <p className="text-muted-foreground">
+              Acompanhe todas as atividades de segurança e qualidade
+            </p>
+          </div>
         </div>
-        <div className="w-48">
-          <Select value={filtroTurno} onValueChange={setFiltroTurno}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos os Turnos</SelectItem>
-              <SelectItem value="1">Turno 1</SelectItem>
-              <SelectItem value="2">Turno 2</SelectItem>
-              <SelectItem value="3">Turno 3</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+
+        {/* Filtros Avançados */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              Filtros Avançados
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div>
+                <Label htmlFor="filtro-turno">Turno</Label>
+                <Select value={filtroTurno} onValueChange={setFiltroTurno}>
+                  <SelectTrigger id="filtro-turno">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os Turnos</SelectItem>
+                    <SelectItem value="1">Turno 1</SelectItem>
+                    <SelectItem value="2">Turno 2</SelectItem>
+                    <SelectItem value="3">Turno 3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="filtro-data-inicio">Data Início</Label>
+                <Input
+                  id="filtro-data-inicio"
+                  type="date"
+                  value={filtroDataInicio}
+                  onChange={(e) => setFiltroDataInicio(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="filtro-data-fim">Data Fim</Label>
+                <Input
+                  id="filtro-data-fim"
+                  type="date"
+                  value={filtroDataFim}
+                  onChange={(e) => setFiltroDataFim(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="filtro-setor">Setor/Local</Label>
+                <Select value={filtroSetor} onValueChange={setFiltroSetor}>
+                  <SelectTrigger id="filtro-setor">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os Setores</SelectItem>
+                    {setoresUnicos.map(setor => (
+                      <SelectItem key={setor} value={setor}>{setor}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="filtro-tipo">Tipo</Label>
+                <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+                  <SelectTrigger id="filtro-tipo">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os Tipos</SelectItem>
+                    {[...tiposNaoConformidade, ...tiposOcorrencia].map(tipo => (
+                      <SelectItem key={tipo} value={tipo}>
+                        {tipo.replace('-', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Checklists */}
@@ -191,20 +341,20 @@ const Supervisao = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-accent" />
-            Ocorrências ({ocorrencias.length})
+            Ocorrências ({ocorrenciasFiltradas.length})
           </CardTitle>
           <CardDescription>
             Acidentes, incidentes e quase-acidentes registrados
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {ocorrencias.length === 0 ? (
+          {ocorrenciasFiltradas.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
               Nenhuma ocorrência encontrada
             </p>
           ) : (
             <div className="space-y-4">
-              {ocorrencias.slice(0, 10).map((ocorrencia) => (
+              {ocorrenciasFiltradas.slice(0, 10).map((ocorrencia) => (
                 <div
                   key={ocorrencia.id}
                   onClick={() => setSelectedOcorrencia(ocorrencia)}
