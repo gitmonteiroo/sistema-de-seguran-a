@@ -12,6 +12,7 @@ import NaoConformidades from "./pages/NaoConformidades";
 import Ocorrencias from "./pages/Ocorrencias";
 import Supervisao from "./pages/Supervisao";
 import Relatorios from "./pages/Relatorios";
+import Definicoes from "./pages/Definicoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,6 +81,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Relatorios />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/definicoes"
+              element={
+                <ProtectedRoute>
+                  <Definicoes />
                 </ProtectedRoute>
               }
             />
