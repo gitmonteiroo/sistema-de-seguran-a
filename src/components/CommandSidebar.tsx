@@ -17,6 +17,7 @@ import {
   Camera,
   Settings,
   History,
+  Users,
 } from 'lucide-react';
 
 interface NavItem {
@@ -44,6 +45,7 @@ const CommandSidebar = () => {
     { icon: Shield, label: 'Centro de Comando', path: '/supervisao' },
     { icon: Camera, label: 'Monitorização', path: '/supervisao?tab=cameras' },
     { icon: History, label: 'Histórico', path: '/supervisao?tab=history' },
+    { icon: Users, label: 'Utilizadores', path: '/utilizadores' },
   ] : [];
 
   const secondaryNavItems: NavItem[] = [

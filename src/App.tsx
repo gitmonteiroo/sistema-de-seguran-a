@@ -13,6 +13,7 @@ import Ocorrencias from "./pages/Ocorrencias";
 import Supervisao from "./pages/Supervisao";
 import Relatorios from "./pages/Relatorios";
 import Definicoes from "./pages/Definicoes";
+import GestaoUtilizadores from "./pages/GestaoUtilizadores";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -89,6 +90,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Definicoes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/utilizadores"
+              element={
+                <ProtectedRoute requireSupervisor>
+                  <GestaoUtilizadores />
                 </ProtectedRoute>
               }
             />
