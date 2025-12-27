@@ -5,6 +5,11 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
   LayoutDashboard,
   ClipboardCheck,
   FileWarning,
@@ -18,6 +23,7 @@ import {
   Settings,
   History,
   Users,
+  User,
 } from 'lucide-react';
 
 interface NavItem {
@@ -211,46 +217,61 @@ const CommandSidebar = () => {
         'border-t border-sidebar-border p-3',
         collapsed ? 'flex flex-col items-center gap-2' : ''
       )}>
-        {!collapsed && (
-          <div className="flex items-center gap-3 mb-3 px-2">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-sm font-semibold text-primary">
-                {user?.name?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name}</p>
-              <p className="text-xs text-sidebar-foreground/60 capitalize">{user?.role}</p>
-            </div>
-          </div>
-        )}
-        
-        {collapsed ? (
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
+        <Popover>
+          <PopoverTrigger asChild>
+            {collapsed ? (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleLogout}
-                className="w-10 h-10 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="w-10 h-10 text-sidebar-foreground hover:bg-sidebar-accent"
               >
-                <LogOut className="h-5 w-5" />
+                <User className="h-5 w-5" />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right" className="bg-card border-border">
-              Sair
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            ) : (
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 h-auto py-2 px-2 hover:bg-sidebar-accent"
+              >
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-semibold text-primary">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name}</p>
+                  <p className="text-xs text-sidebar-foreground/60 capitalize">{user?.role}</p>
+                </div>
+              </Button>
+            )}
+          </PopoverTrigger>
+          <PopoverContent 
+            side={collapsed ? "right" : "top"} 
+            align="start"
+            className="w-64 p-4 bg-card border-border"
           >
-            <LogOut className="h-5 w-5" />
-            <span>Sair</span>
-          </Button>
-        )}
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-2">Minha Conta</h4>
+                <div className="space-y-1">
+                  <p className="text-sm text-foreground">{user?.name}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground capitalize">Função: {user?.role}</p>
+                </div>
+              </div>
+              
+              <div className="border-t border-border pt-3">
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sair</span>
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </aside>
   );
