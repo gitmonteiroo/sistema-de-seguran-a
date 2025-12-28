@@ -219,47 +219,45 @@ const CommandSidebar = () => {
       )}>
         <Popover>
           <PopoverTrigger asChild>
-            {collapsed ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 text-sidebar-foreground hover:bg-sidebar-accent"
-              >
-                <User className="h-5 w-5" />
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 h-auto py-2 px-2 hover:bg-sidebar-accent"
-              >
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-semibold text-primary">
-                    {user?.name?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
+            <button
+              type="button"
+              className={cn(
+                'flex items-center gap-3 rounded-lg transition-colors cursor-pointer',
+                collapsed 
+                  ? 'w-10 h-10 justify-center hover:bg-sidebar-accent' 
+                  : 'w-full py-2 px-2 hover:bg-sidebar-accent'
+              )}
+            >
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-semibold text-primary">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+              {!collapsed && (
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name}</p>
-                  <p className="text-xs text-sidebar-foreground/60 capitalize">{user?.role}</p>
+                  <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'Utilizador'}</p>
+                  <p className="text-xs text-sidebar-foreground/60 capitalize">{user?.role || 'operador'}</p>
                 </div>
-              </Button>
-            )}
+              )}
+            </button>
           </PopoverTrigger>
           <PopoverContent 
             side={collapsed ? "right" : "top"} 
             align="start"
-            className="w-64 p-4 bg-card border-border"
+            sideOffset={8}
+            className="w-64 p-4"
           >
             <div className="space-y-4">
               <div>
-                <h4 className="text-sm font-semibold text-foreground mb-2">Minha Conta</h4>
+                <h4 className="text-sm font-semibold mb-2">Minha Conta</h4>
                 <div className="space-y-1">
-                  <p className="text-sm text-foreground">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
-                  <p className="text-xs text-muted-foreground capitalize">Função: {user?.role}</p>
+                  <p className="text-sm">{user?.name || 'Utilizador'}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email || 'Sem email'}</p>
+                  <p className="text-xs text-muted-foreground capitalize">Função: {user?.role || 'operador'}</p>
                 </div>
               </div>
               
-              <div className="border-t border-border pt-3">
+              <div className="border-t pt-3">
                 <Button
                   variant="ghost"
                   onClick={handleLogout}
