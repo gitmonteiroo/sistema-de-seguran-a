@@ -5,10 +5,13 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   LayoutDashboard,
   ClipboardCheck,
@@ -24,6 +27,7 @@ import {
   History,
   Users,
   User,
+  ChevronDown,
 } from 'lucide-react';
 
 interface NavItem {
@@ -217,8 +221,8 @@ const CommandSidebar = () => {
         'border-t border-sidebar-border p-3',
         collapsed ? 'flex flex-col items-center gap-2' : ''
       )}>
-        <Popover>
-          <PopoverTrigger asChild>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <button
               type="button"
               className={cn(
@@ -234,42 +238,39 @@ const CommandSidebar = () => {
                 </span>
               </div>
               {!collapsed && (
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'Utilizador'}</p>
-                  <p className="text-xs text-sidebar-foreground/60 capitalize">{user?.role || 'operador'}</p>
-                </div>
+                <>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'Utilizador'}</p>
+                    <p className="text-xs text-sidebar-foreground/60 capitalize">{user?.role || 'operador'}</p>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-sidebar-foreground/60" />
+                </>
               )}
             </button>
-          </PopoverTrigger>
-          <PopoverContent 
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
             side={collapsed ? "right" : "top"} 
             align="start"
             sideOffset={8}
-            className="w-64 p-4"
+            className="w-56"
           >
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Minha Conta</h4>
-                <div className="space-y-1">
-                  <p className="text-sm">{user?.name || 'Utilizador'}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email || 'Sem email'}</p>
-                  <p className="text-xs text-muted-foreground capitalize">Função: {user?.role || 'operador'}</p>
-                </div>
-              </div>
-              
-              <div className="border-t pt-3">
-                <Button
-                  variant="ghost"
-                  onClick={handleLogout}
-                  className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Sair</span>
-                </Button>
-              </div>
+            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium">{user?.name || 'Utilizador'}</p>
+              <p className="text-xs text-muted-foreground">{user?.email || 'Sem email'}</p>
+              <p className="text-xs text-muted-foreground capitalize">Função: {user?.role || 'operador'}</p>
             </div>
-          </PopoverContent>
-        </Popover>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              onClick={handleLogout}
+              className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              <span>Sair</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   );
