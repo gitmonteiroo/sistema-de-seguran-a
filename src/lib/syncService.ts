@@ -21,26 +21,19 @@ async function syncChecklists(userId: string): Promise<{ synced: number; failed:
 
   for (const checklist of pending) {
     try {
+      // Don't send the local ID - let Supabase generate UUID
       const { error } = await supabase.from('checklists').insert({
-        id: checklist.id,
         turno: checklist.turno,
         data: checklist.data,
         items: checklist.items,
         observacoes: checklist.observacoes,
         operador: checklist.operador,
         user_id: userId,
-        created_at: checklist.createdAt,
       });
 
       if (error) {
-        // If duplicate key, mark as synced anyway
-        if (error.code === '23505') {
-          await markAsSynced('checklists', checklist.id);
-          synced++;
-        } else {
-          console.error('Error syncing checklist:', error);
-          failed++;
-        }
+        console.error('Error syncing checklist:', error);
+        failed++;
       } else {
         await markAsSynced('checklists', checklist.id);
         synced++;
@@ -61,8 +54,8 @@ async function syncNaoConformidades(userId: string): Promise<{ synced: number; f
 
   for (const nc of pending) {
     try {
+      // Don't send the local ID - let Supabase generate UUID
       const { error } = await supabase.from('nao_conformidades').insert({
-        id: nc.id,
         tipo: nc.tipo,
         descricao: nc.descricao,
         local: nc.local,
@@ -71,17 +64,11 @@ async function syncNaoConformidades(userId: string): Promise<{ synced: number; f
         data: nc.data,
         operador: nc.operador,
         user_id: userId,
-        created_at: nc.createdAt,
       });
 
       if (error) {
-        if (error.code === '23505') {
-          await markAsSynced('naoConformidades', nc.id);
-          synced++;
-        } else {
-          console.error('Error syncing não conformidade:', error);
-          failed++;
-        }
+        console.error('Error syncing não conformidade:', error);
+        failed++;
       } else {
         await markAsSynced('naoConformidades', nc.id);
         synced++;
@@ -102,8 +89,8 @@ async function syncOcorrencias(userId: string): Promise<{ synced: number; failed
 
   for (const oc of pending) {
     try {
+      // Don't send the local ID - let Supabase generate UUID
       const { error } = await supabase.from('ocorrencias').insert({
-        id: oc.id,
         tipo: oc.tipo,
         setor: oc.setor,
         descricao: oc.descricao,
@@ -111,20 +98,14 @@ async function syncOcorrencias(userId: string): Promise<{ synced: number; failed
         envolvidos: oc.envolvidos,
         foto: oc.foto,
         data: oc.data,
-        turno: 1, // Default turno
+        turno: 1, // Default turno - field not stored locally
         operador: oc.operador,
         user_id: userId,
-        created_at: oc.createdAt,
       });
 
       if (error) {
-        if (error.code === '23505') {
-          await markAsSynced('ocorrencias', oc.id);
-          synced++;
-        } else {
-          console.error('Error syncing ocorrência:', error);
-          failed++;
-        }
+        console.error('Error syncing ocorrência:', error);
+        failed++;
       } else {
         await markAsSynced('ocorrencias', oc.id);
         synced++;
