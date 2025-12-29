@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import CommandSidebar from '@/components/CommandSidebar';
 import MobileNavigation from '@/components/MobileNavigation';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LayoutProps {
@@ -12,12 +13,15 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background flex w-full">
+      {/* Offline/Sync Indicator */}
+      <OfflineIndicator />
+      
       {/* Desktop Sidebar - hidden on mobile */}
       {!isMobile && <CommandSidebar />}
       
       {/* Main Content Area */}
       <main className={`flex-1 ${!isMobile ? 'ml-16 lg:ml-64' : ''} transition-all duration-300`}>
-        <div className="min-h-screen p-4 md:p-6 pb-20 md:pb-6">
+        <div className="min-h-screen p-4 md:p-6 pb-20 md:pb-6 pt-12">
           {children}
         </div>
         

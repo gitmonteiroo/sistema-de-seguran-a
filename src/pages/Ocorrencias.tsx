@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { addOcorrencia } from '@/lib/db';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { AlertTriangle, Camera } from 'lucide-react';
+import { AlertTriangle, Camera, WifiOff } from 'lucide-react';
 
 const tiposOcorrencia = [
   { value: 'acidente', label: 'Acidente', color: 'text-destructive' },
@@ -30,6 +31,7 @@ const setores = [
 
 const Ocorrencias = () => {
   const { user } = useAuth();
+  const { isOnline } = useOnlineStatus();
   const [tipo, setTipo] = useState<'acidente' | 'incidente' | 'quase-acidente'>('incidente');
   const [setor, setSetor] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -77,7 +79,11 @@ const Ocorrencias = () => {
 
       await addOcorrencia(ocorrencia);
       
-      toast.success('Ocorrência registrada com sucesso!');
+      if (isOnline) {
+        toast.success('Ocorrência registrada e sincronizada!');
+      } else {
+        toast.success('Ocorrência salva localmente. Será sincronizada quando online.');
+      }
       
       // Reset form
       setSetor('');

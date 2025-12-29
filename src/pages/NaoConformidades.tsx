@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { addNaoConformidade } from '@/lib/db';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { FileWarning, Camera } from 'lucide-react';
+import { FileWarning, Camera, WifiOff } from 'lucide-react';
 
 const tiposNaoConformidade = [
   'Equipamento danificado',
@@ -34,6 +35,7 @@ const setores = [
 
 const NaoConformidades = () => {
   const { user } = useAuth();
+  const { isOnline } = useOnlineStatus();
   const [tipo, setTipo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [local, setLocal] = useState('');
@@ -77,7 +79,11 @@ const NaoConformidades = () => {
 
       await addNaoConformidade(naoConformidade);
       
-      toast.success('Não conformidade registrada com sucesso!');
+      if (isOnline) {
+        toast.success('Não conformidade registrada e sincronizada!');
+      } else {
+        toast.success('Não conformidade salva localmente. Será sincronizada quando online.');
+      }
       
       // Reset form
       setTipo('');
