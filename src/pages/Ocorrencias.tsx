@@ -33,6 +33,7 @@ const Ocorrencias = () => {
   const { user } = useAuth();
   const { isOnline } = useOnlineStatus();
   const [tipo, setTipo] = useState<'acidente' | 'incidente' | 'quase-acidente'>('incidente');
+  const [turno, setTurno] = useState<1 | 2 | 3>(1);
   const [setor, setSetor] = useState('');
   const [descricao, setDescricao] = useState('');
   const [causa, setCausa] = useState('');
@@ -66,6 +67,7 @@ const Ocorrencias = () => {
       const ocorrencia = {
         id: `ocorrencia-${Date.now()}`,
         tipo,
+        turno,
         setor,
         descricao: descricao.trim(),
         causa: causa.trim() || undefined,
@@ -86,6 +88,7 @@ const Ocorrencias = () => {
       }
       
       // Reset form
+      setTurno(1);
       setSetor('');
       setDescricao('');
       setCausa('');
@@ -136,20 +139,36 @@ const Ocorrencias = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="setor" className="text-sm">Setor *</Label>
-              <Select value={setor} onValueChange={setSetor}>
-                <SelectTrigger id="setor">
-                  <SelectValue placeholder="Selecione o setor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {setores.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="turno" className="text-sm">Turno *</Label>
+                <Select value={turno.toString()} onValueChange={(v) => setTurno(parseInt(v) as 1 | 2 | 3)}>
+                  <SelectTrigger id="turno">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1º Turno (06:00 - 14:00)</SelectItem>
+                    <SelectItem value="2">2º Turno (14:00 - 22:00)</SelectItem>
+                    <SelectItem value="3">3º Turno (22:00 - 06:00)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="setor" className="text-sm">Setor *</Label>
+                <Select value={setor} onValueChange={setSetor}>
+                  <SelectTrigger id="setor">
+                    <SelectValue placeholder="Selecione o setor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {setores.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">

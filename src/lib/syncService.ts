@@ -92,13 +92,13 @@ async function syncOcorrencias(userId: string): Promise<{ synced: number; failed
       // Don't send the local ID - let Supabase generate UUID
       const { error } = await supabase.from('ocorrencias').insert({
         tipo: oc.tipo,
+        turno: oc.turno,
         setor: oc.setor,
         descricao: oc.descricao,
         causa: oc.causa,
         envolvidos: oc.envolvidos,
         foto: oc.foto,
         data: oc.data,
-        turno: 1, // Default turno - field not stored locally
         operador: oc.operador,
         user_id: userId,
       });

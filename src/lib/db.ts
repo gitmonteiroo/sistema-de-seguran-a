@@ -46,6 +46,7 @@ interface SafetyDB extends DBSchema {
     value: {
       id: string;
       tipo: 'acidente' | 'incidente' | 'quase-acidente';
+      turno: 1 | 2 | 3;
       setor: string;
       descricao: string;
       causa?: string;
