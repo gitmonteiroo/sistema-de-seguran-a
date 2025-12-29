@@ -94,30 +94,30 @@ const Ocorrencias = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Ocorrências</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2">Ocorrências</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Registre acidentes, incidentes e quase-acidentes
         </p>
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-6 h-6 text-accent" />
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+              <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-accent" />
               Registro de Ocorrência
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs md:text-sm">
               Documente eventos relacionados à segurança
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-5 md:space-y-6 p-4 pt-0 md:p-6 md:pt-0">
             <div className="space-y-2">
-              <Label htmlFor="tipo">Tipo de Ocorrência *</Label>
+              <Label htmlFor="tipo" className="text-sm">Tipo de Ocorrência *</Label>
               <Select value={tipo} onValueChange={(v) => setTipo(v as any)}>
-                <SelectTrigger id="tipo" className="h-12">
+                <SelectTrigger id="tipo">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -131,9 +131,9 @@ const Ocorrencias = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="setor">Setor *</Label>
+              <Label htmlFor="setor" className="text-sm">Setor *</Label>
               <Select value={setor} onValueChange={setSetor}>
-                <SelectTrigger id="setor" className="h-12">
+                <SelectTrigger id="setor">
                   <SelectValue placeholder="Selecione o setor" />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,57 +147,64 @@ const Ocorrencias = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="descricao">Descrição do Ocorrido *</Label>
+              <Label htmlFor="descricao" className="text-sm">Descrição do Ocorrido *</Label>
               <Textarea
                 id="descricao"
                 placeholder="Descreva o que aconteceu com o máximo de detalhes possível..."
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                rows={5}
+                rows={4}
+                className="min-h-[120px] text-base md:text-sm"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="causa">Possível Causa (opcional)</Label>
+              <Label htmlFor="causa" className="text-sm">Possível Causa (opcional)</Label>
               <Textarea
                 id="causa"
                 placeholder="Descreva a possível causa da ocorrência..."
                 value={causa}
                 onChange={(e) => setCausa(e.target.value)}
                 rows={3}
+                className="min-h-[100px] text-base md:text-sm"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="envolvidos">Envolvidos (opcional)</Label>
+              <Label htmlFor="envolvidos" className="text-sm">Envolvidos (opcional)</Label>
               <Input
                 id="envolvidos"
                 placeholder="Nome dos envolvidos (separados por vírgula)"
                 value={envolvidos}
                 onChange={(e) => setEnvolvidos(e.target.value)}
-                className="h-12"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="foto-ocorrencia">Foto (opcional)</Label>
-              <div className="flex items-center gap-4">
-                <Input
-                  id="foto-ocorrencia"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFotoChange}
-                  className="h-12"
-                />
-                <Camera className="w-6 h-6 text-muted-foreground" />
+              <Label htmlFor="foto-ocorrencia" className="text-sm">Foto (opcional)</Label>
+              <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+                <div className="relative flex-1">
+                  <Input
+                    id="foto-ocorrencia"
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFotoChange}
+                    className="file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Camera className="w-5 h-5" />
+                  <span className="text-xs md:hidden">Tirar foto ou selecionar</span>
+                </div>
               </div>
               {foto && (
-                <div className="mt-4">
+                <div className="mt-3">
                   <img
                     src={foto}
                     alt="Preview"
-                    className="max-w-xs rounded-lg border"
+                    className="max-w-full md:max-w-xs rounded-lg border"
                   />
                 </div>
               )}
@@ -206,7 +213,7 @@ const Ocorrencias = () => {
             <Button
               type="submit"
               size="lg"
-              className="w-full bg-accent hover:bg-accent/90"
+              className="w-full bg-accent hover:bg-accent/90 min-h-[52px] text-base"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Registrando...' : 'Registrar Ocorrência'}

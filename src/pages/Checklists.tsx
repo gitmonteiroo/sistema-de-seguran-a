@@ -9,6 +9,7 @@ import { addChecklist } from '@/lib/db';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { CheckCircle2, XCircle, ClipboardCheck } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const checklistItems = [
   'Trava-rodas posicionados corretamente?',
@@ -76,38 +77,38 @@ const Checklists = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Checklist de Segurança</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2">Checklist de Segurança</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Preencha o checklist diário do seu turno
         </p>
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ClipboardCheck className="w-6 h-6 text-primary" />
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+              <ClipboardCheck className="w-5 h-5 md:w-6 md:h-6 text-primary" />
               Checklist Diário
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs md:text-sm">
               Todos os itens devem ser verificados antes de iniciar as atividades
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-5 md:space-y-6 p-4 pt-0 md:p-6 md:pt-0">
             {/* Seleção de Turno */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Selecione o Turno</Label>
+              <Label className="text-sm md:text-base font-semibold">Selecione o Turno</Label>
               <RadioGroup
                 value={turno}
                 onValueChange={(value) => setTurno(value as '1' | '2' | '3')}
-                className="flex gap-4"
+                className="flex gap-4 md:gap-6"
               >
                 {['1', '2', '3'].map((t) => (
                   <div key={t} className="flex items-center space-x-2">
-                    <RadioGroupItem value={t} id={`turno-${t}`} />
-                    <Label htmlFor={`turno-${t}`} className="cursor-pointer font-normal">
+                    <RadioGroupItem value={t} id={`turno-${t}`} className="h-5 w-5 md:h-4 md:w-4" />
+                    <Label htmlFor={`turno-${t}`} className="cursor-pointer font-normal text-sm md:text-base">
                       Turno {t}
                     </Label>
                   </div>
@@ -116,25 +117,26 @@ const Checklists = () => {
             </div>
 
             {/* Itens do Checklist */}
-            <div className="space-y-4">
-              <Label className="text-base font-semibold">Itens de Verificação</Label>
-              <div className="space-y-3">
+            <div className="space-y-3 md:space-y-4">
+              <Label className="text-sm md:text-base font-semibold">Itens de Verificação</Label>
+              <div className="space-y-2 md:space-y-3">
                 {checklistItems.map((item, index) => (
                   <Card key={index} className="border-2">
-                    <CardContent className="pt-4">
-                      <div className="flex items-start justify-between gap-4">
+                    <CardContent className="p-3 md:pt-4 md:p-4">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4">
                         <p className="text-sm flex-1">{item}</p>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full md:w-auto">
                           <Button
                             type="button"
                             variant={respostas[index] === true ? 'default' : 'outline'}
-                            size="sm"
+                            size="default"
                             onClick={() => handleResposta(index, true)}
-                            className={
+                            className={cn(
+                              'flex-1 md:flex-none min-h-[44px]',
                               respostas[index] === true
                                 ? 'bg-success hover:bg-success/90'
                                 : ''
-                            }
+                            )}
                           >
                             <CheckCircle2 className="w-4 h-4 mr-1" />
                             Sim
@@ -142,8 +144,9 @@ const Checklists = () => {
                           <Button
                             type="button"
                             variant={respostas[index] === false ? 'destructive' : 'outline'}
-                            size="sm"
+                            size="default"
                             onClick={() => handleResposta(index, false)}
+                            className="flex-1 md:flex-none min-h-[44px]"
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Não
