@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -8,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { addChecklist } from '@/lib/db';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { CheckCircle2, XCircle, ClipboardCheck } from 'lucide-react';
+import { CheckCircle2, XCircle, ClipboardCheck, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const checklistItems = [
@@ -26,6 +27,7 @@ const checklistItems = [
 
 const Checklists = () => {
   const { user } = useAuth();
+  const { isOnline } = useOnlineStatus();
   const [turno, setTurno] = useState<'1' | '2' | '3'>('1');
   const [respostas, setRespostas] = useState<Record<number, boolean>>({});
   const [observacoes, setObservacoes] = useState('');
@@ -63,7 +65,11 @@ const Checklists = () => {
 
       await addChecklist(checklist);
       
-      toast.success('Checklist salvo com sucesso!');
+      if (isOnline) {
+        toast.success('Checklist salvo e sincronizado!');
+      } else {
+        toast.success('Checklist salvo localmente. Será sincronizado quando online.');
+      }
       
       // Reset form
       setRespostas({});
