@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Wifi, WifiOff, Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { Wifi, WifiOff, Cloud, RefreshCw } from 'lucide-react';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
-import { getPendingCount, syncAllData, SyncStatus } from '@/lib/syncService';
+import { getPendingCount, syncAllData, startAutoSync, stopAutoSync, SyncStatus } from '@/lib/syncService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ export function OfflineIndicator() {
   const [pendingCount, setPendingCount] = useState(0);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [showBanner, setShowBanner] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
 
   // Check pending count periodically
   useEffect(() => {
@@ -26,35 +27,25 @@ export function OfflineIndicator() {
     return () => clearInterval(interval);
   }, []);
 
+  // Start auto-sync when user is authenticated
+  useEffect(() => {
+    if (user?.id) {
+      startAutoSync(user.id, 60000); // Sync every minute
+    }
+    return () => stopAutoSync();
+  }, [user?.id]);
+
   // Show banner when offline or has pending
   useEffect(() => {
     setShowBanner(!isOnline || pendingCount > 0);
   }, [isOnline, pendingCount]);
 
-  // Auto-sync when coming back online
-  useEffect(() => {
-    const handleSyncNeeded = async () => {
-      if (isOnline && user && pendingCount > 0) {
-        await handleSync();
-      }
-    };
-
-    window.addEventListener('app:sync-needed', handleSyncNeeded);
-    
-    // Also try to sync immediately when online and has pending
-    if (isOnline && user && pendingCount > 0 && syncStatus === 'idle') {
-      handleSync();
-    }
-
-    return () => {
-      window.removeEventListener('app:sync-needed', handleSyncNeeded);
-    };
-  }, [isOnline, user, pendingCount]);
-
-  const handleSync = async () => {
-    if (!user || syncStatus === 'syncing') return;
+  const handleSync = useCallback(async () => {
+    if (!user || syncStatus === 'syncing' || syncStatus === 'retrying') return;
 
     setSyncStatus('syncing');
+    setRetryAttempt(0);
+    
     try {
       const result = await syncAllData(user.id);
       const totalSynced = result.checklists.synced + result.naoConformidades.synced + result.ocorrencias.synced;
@@ -78,10 +69,40 @@ export function OfflineIndicator() {
     } catch (error) {
       console.error('Sync error:', error);
       setSyncStatus('error');
-      toast.error('Erro ao sincronizar dados');
-      setTimeout(() => setSyncStatus('idle'), 3000);
+      toast.error('Erro ao sincronizar dados. Tentando novamente automaticamente...');
+      
+      // Auto-retry after error with exponential backoff
+      setRetryAttempt(prev => prev + 1);
+      const delay = Math.min(1000 * Math.pow(2, retryAttempt), 30000);
+      
+      setTimeout(() => {
+        setSyncStatus('idle');
+        if (isOnline && pendingCount > 0) {
+          handleSync();
+        }
+      }, delay);
     }
-  };
+  }, [user, syncStatus, isOnline, pendingCount, retryAttempt]);
+
+  // Auto-sync when coming back online
+  useEffect(() => {
+    const handleSyncNeeded = async () => {
+      if (isOnline && user && pendingCount > 0) {
+        await handleSync();
+      }
+    };
+
+    window.addEventListener('app:sync-needed', handleSyncNeeded);
+    
+    // Also try to sync immediately when online and has pending
+    if (isOnline && user && pendingCount > 0 && syncStatus === 'idle') {
+      handleSync();
+    }
+
+    return () => {
+      window.removeEventListener('app:sync-needed', handleSyncNeeded);
+    };
+  }, [isOnline, user, pendingCount, syncStatus, handleSync]);
 
   if (!showBanner) return null;
 
@@ -104,10 +125,13 @@ export function OfflineIndicator() {
         </>
       ) : pendingCount > 0 ? (
         <>
-          {syncStatus === 'syncing' ? (
+          {syncStatus === 'syncing' || syncStatus === 'retrying' ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>Sincronizando {pendingCount} registro(s)...</span>
+              <span>
+                Sincronizando {pendingCount} registro(s)...
+                {retryAttempt > 0 && ` (tentativa ${retryAttempt + 1})`}
+              </span>
             </>
           ) : (
             <>
