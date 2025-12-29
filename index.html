@@ -1,31 +1,92 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1e3a8a" />
-    <title>Sistema de Segurança Industrial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Ocorrências" />
+    <meta name="application-name" content="Ocorrências" />
+    <meta name="msapplication-TileColor" content="#0f172a" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- App Info -->
+    <title>Sistema de Ocorrências de Segurança</title>
     <meta name="description" content="Sistema de Checklists e Registro de Ocorrências para Segurança e Qualidade Industrial" />
     <meta name="author" content="César Monteiro" />
+    <meta name="keywords" content="segurança, ocorrências, checklists, industrial, qualidade" />
 
-    <meta property="og:title" content="Sistema de Segurança Industrial" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="Sistema de Ocorrências de Segurança" />
     <meta property="og:description" content="Sistema de Checklists e Registro de Ocorrências para Segurança e Qualidade Industrial" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sistema de Ocorrências de Segurança" />
+    <meta name="twitter:description" content="Sistema de Checklists e Registro de Ocorrências" />
 
+    <!-- PWA Links -->
     <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/icon-512.png" />
+    
+    <!-- Prevent flash of white on dark mode -->
+    <style>
+      html { background-color: #0f172a; }
+    </style>
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        window.addEventListener('load', async () => {
+          try {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/'
+            });
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New content available, notify user
+                    console.log('Nova versão disponível!');
+                  }
+                });
+              }
+            });
+            
+            console.log('Service Worker registrado com sucesso');
+          } catch (error) {
+            console.log('Falha ao registrar Service Worker:', error);
+          }
         });
+      }
+    </script>
+    
+    <!-- iOS standalone mode detection -->
+    <script>
+      if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
+        document.documentElement.classList.add('pwa-standalone');
       }
     </script>
   </body>
