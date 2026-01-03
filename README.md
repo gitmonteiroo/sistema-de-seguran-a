@@ -145,14 +145,17 @@ O sistema foi projetado para ser usado em dispositivos móveis no chão de fábr
 
 ## 👥 Credenciais de Teste
 
+🔐 Credenciais de demonstração
+Solicite acesso ou consulte o arquivo .env.example
+
 ### Supervisor
-- **E-mail:** admin@gmail.com
-- **Senha:** admin
+- **E-mail:** 
+- **Senha:**
 - **Acesso a:** Todos os módulos + Supervisão
 
 ### Operador
-- **E-mail:** operador@gmail.com
-- **Senha:** operador
+- **E-mail:** 
+- **Senha:** 
 - **Acesso a:** Checklists, Não Conformidades, Ocorrências, Relatórios
 
 ## 📊 Estrutura do Projeto
